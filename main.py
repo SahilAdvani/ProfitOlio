@@ -193,3 +193,25 @@ if not st.session_state.portfolio.empty:
         st.write("Unable to calculate values for the stocks in your portfolio.")
 else:
     st.write("Your portfolio is currently empty.")
+
+# Adding time series graph
+import matplotlib.pyplot as plt
+def calculate_current_value_for_last_month():
+  for _, row in st.session_state.portfolio.iterrows():
+    symbol = row['Stock Symbol']
+    # Fetch current stock price
+    stock_info = yf.Ticker(symbol)
+    try:
+      current_price_for_every_hour = stock_info.history(period='1mo',interval='1d')["Close"]
+      # plotting the time seies graph
+      fig,ax=plt.subplots()
+      ax=plt.plot(current_price_for_every_hour)
+      plt.xlabel("Date")
+      plt.ylabel("Stock Price")
+      plt.title(f"Stock price of {symbol} in last 30 days")
+      st.pyplot(fig)
+    except:
+      st.error(f"Failed to fetch current price for {symbol}.")
+      continue
+
+calculate_current_value_for_last_month()
