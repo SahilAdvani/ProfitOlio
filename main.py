@@ -250,16 +250,15 @@ else:
     st.write("Your portfolio is currently empty.")
 
 
-
-def calculate_current_value_for_last_month_plotly():
+def calculate_current_value_for_last_month_plotly(period='1mo',interval='1d'):
     for _, row in st.session_state.portfolio.iterrows():
         symbol = row['Stock Symbol']
         stock_info = yf.Ticker(symbol)
         try:
-            stock_history = stock_info.history(period='1mo', interval='1d')
+            stock_history = stock_info.history(period=period, interval=interval)
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=stock_history.index, y=stock_history['Close'], mode='lines', name=symbol))
-            fig.update_layout(title=f'Stock Price of {symbol} in Last 30 Days',
+            fig.update_layout(title=f'Stock Price Overview of {symbol}',
                             xaxis_title='Date',
                             yaxis_title='Stock Price')
             st.plotly_chart(fig)
@@ -268,7 +267,36 @@ def calculate_current_value_for_last_month_plotly():
             st.error(f"Failed to fetch current price for {symbol}. Error: {e}")
             continue
 
-calculate_current_value_for_last_month_plotly()
+period = st.radio('Select Period', ['1mo', '3mo', '1y','5y'], index=0, key='Stock Price Plot')
+
+st.markdown(
+    """
+    <style>
+    .stRadio > div[role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .stRadio > div[role="radiogroup"] > label {
+        flex: 1;
+        margin-right: 10px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+if period == '1mo':
+    calculate_current_value_for_last_month_plotly(period,'1d')
+if period == '3mo':
+    calculate_current_value_for_last_month_plotly(period,'1wk')
+if period == '1y':
+    calculate_current_value_for_last_month_plotly(period,'1mo')
+if period == '5y':
+    calculate_current_value_for_last_month_plotly(period,'3mo')
+
+
 
 def profit_loss_bar_plot(period='1d',interval='1h'):
     for _, row in st.session_state.portfolio.iterrows():
@@ -293,7 +321,7 @@ def profit_loss_bar_plot(period='1d',interval='1h'):
             st.error(f"Failed to plot Profit Loss Overview for {symbol}. Error: {e}")
 
 
-period = st.radio('Select Period', ['1d', '1wk', '1mo', '3mo', '1y','5y'], index=0)
+period = st.radio('Select Period', ['1d', '1wk', '1mo', '3mo', '1y','5y'], index=0, key='Profit/Loss Plot')
 
 st.markdown(
     """
